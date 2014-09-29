@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SONY Action Cam Streaming from NodeJS with Socket.io</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+    <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script src="js/socket.io.min.js"></script>
+    <script>
+        // init
+        var framecount=0;
+        function checkImage(src){
+            var im = new Image();
+            im.onload = function(){
+                //$("#imgtag").attr('src', src);
+                $("html").css('background', 'url('+src+') no-repeat center center fixed');
+                $("html").css('-webkit-background-size', 'cover');
+                $("html").css('-moz-background-size', 'cover');
+                $("html").css('-o-background-size', 'cover');
+                $("html").css('background-size', 'cover');
+                framecount++;
+            };
+            im.onerror = function() {
+                console.log("No Image To Load");
+            };
+            im.src = src;
+        }
+        $(function() {
+
+            setInterval(function(){
+                var ran = Math.floor(Math.random()*10000001);
+                //checkImage("final.jpg?"+ran);
+                checkImage("test.png?"+ran);
+                //$("#imgtag").attr('src', "final.jpg?"+ran);
+            }, 30);
+            var intervalstart = false;
+            if (!intervalstart) {
+                setInterval(function() {
+                    ms.html("Frames Per Second: " + framecount);
+
+                    framecount = 0;
+                }, 1000);
+                intervalstart = true;
+            }
+
+
+            // milisecond display
+            var ms = $("#ms");
+
+            // number of frames per second
+            //var framecount = 0;
+
+            // connect to socket on port 8080
+            var socket = io.connect('http://localhost:8080');
+
+            // init for the interval
+//            var intervalstart = false;
+//            if (!intervalstart) {
+//                setInterval(function() {
+//                    ms.html("Frames Per Second: " + framecount);
+//
+//                    framecount = 0;
+//                }, 1000);
+//                intervalstart = true;
+//            }
+
+            var imgstr = "";
+
+            socket.on('bufferpush', function(data) {
+                socket.emit("done", true);
+            });
+
+            // manage image data via socket
+            socket.on('image', function(data) {
+
+                // ignore null values
+                if (data != null) {
+
+                    // start the framecoutn on our first frame
+                    if (!intervalstart) {
+                        setInterval(function() {
+                            ms.html("Frames Per Second: " + framecount);
+
+                            framecount = 0;
+                        }, 1000);
+                        intervalstart = true;
+                    }
+
+                    // increase the framecount
+
+                    //console.log(data);
+                    // write image to screen (could also use canvas);
+                    //$("#imgtag").attr('src', 'data:image/png;base64,' + data);
+
+//                    var _socket = socket.socket;
+//                    _socket.buffer = [];
+                    // tell the server to send the next chunk
+                    socket.emit("done", true);
+
+                }
+
+            });
+
+            // reconnect after disconnection
+            socket.on('disconnect', function(data) {
+                // reconnect to server
+                var _socket = socket.socket;
+                _socket.buffer = []; // clear buffer
+                _socket.connect();
+                _socket.emit('done', true);
+            });
+
+        });
+    </script>
+    <style>
+        /*Float Image in center*/
+/*
+        #imgtag, #ms{
+            max-width:640px;
+            display:block;
+            margin:0 auto;
+        }
+        #ms {
+            color:#fff;
+            background-color:#000;
+        }
+*/
+        #overlay{
+            color:#000;
+            background:#fff;
+            position:absolute;
+            top:20px;
+            left:20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="overlay" class="container">
+        <div class="row">
+            <h1 class="col-xs-12">SONY Action Cam Streaming from NodeJS</h1>
+            <strong><div id="ms"></div></strong>
+        </div>
+    </div>
+</body>
+
+</html>

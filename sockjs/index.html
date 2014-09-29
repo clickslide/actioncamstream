@@ -1,0 +1,125 @@
+<!--
+  ~ Copyright 2011-2012 the original author or authors.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<html>
+
+<head>
+    <title>SockJS Test</title>
+    <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+    <script src="js/sockjs.min.js"></script>
+    <script src="js/vertxbus-2.1.js"></script>
+</head>
+
+<body>
+
+    <script>
+        $(function() {
+            // milisecond display
+            var ms = $("#ms");
+
+            // number of frames per second
+            var framecount = 0;
+
+            // init for the interval
+            var intervalstart = false;
+
+            var imgstr = "";
+            //vertx eventbus for video feed
+            var eb = new vertx.EventBus('http://localhost:8080/eventbus');
+            eb.onopen = function() {
+                eb.registerHandler('video-feed', function(msg, replyTo) {
+                    // ignore null values
+                    if (msg.data != null) {
+
+                        // start the framecoutn on our first frame
+                        if (!intervalstart) {
+                            setInterval(function() {
+                                ms.html("Frames Per Second: " + framecount);
+                                framecount = 0;
+                            }, 1000);
+                            intervalstart = true;
+                        }
+
+                        // increase the framecount
+                        framecount++;
+                        var img = window.btoa(msg.data);
+                        console.log(img);
+                        $("#imgtag").attr('src', 'data:image/jpeg;base64,' + img);
+                        // send the verification
+                        replyTo('true');
+                    }else{
+                        console.log("No Data");   
+                    }
+                });
+            };
+            
+            // SockJS server for controls
+            //            var sock = new SockJS('http://localhost:8080/video');
+            //            sock.onopen = function() {
+            //                console.log('open');
+            //            };
+            //            sock.onmessage = function(e) {
+            //                // ignore null values
+            //                    if (e.data != null) {
+            //
+            //                        // start the framecoutn on our first frame
+            //                        if (!intervalstart) {
+            //                            setInterval(function() {
+            //                                ms.html("Frames Per Second: " + framecount);
+            //                                framecount = 0;
+            //                            }, 1000);
+            //                            intervalstart = true;
+            //                        }
+            //
+            //                        // increase the framecount
+            //                        framecount++;
+            //                        
+            //                        var str = window.btoa(unescape(encodeURIComponent(e.data)));
+            //                        console.log(str);
+            //                        // write image to screen (could also use canvas);
+            //                        $("#imgtag").attr('src', 'data:image/jpeg;base64,' + str);
+            //
+            //                    }
+            //            };
+            //            sock.onclose = function() {
+            //                console.log('close');
+            //            };
+            //
+            //            var send = function(message) {
+            //                if (sock.readyState === SockJS.OPEN) {
+            //                    console.log("sending message")
+            //                    sock.send(message);
+            //                } else {
+            //                    console.log("The socket is not open.");
+            //                }
+            //            }
+        });
+    </script>
+    <div class="container">
+        <div class="row">
+            <h1 class="col-xs-12">SONY Action Cam Streaming from Vertx with SockJS</h1>
+        </div>
+        <div class="row">
+            <img class="col-xs-12" id="imgtag" src="" />
+            <!--<canvas id='canvas'></canvas>-->
+        </div>
+        <div class="row">
+            <div class="col-xs-12" id="ms"></div>
+        </div>
+    </div>
+</body>
+
+</html>

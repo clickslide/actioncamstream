@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SONY Action Cam Streaming from NodeJS with Socket.io</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+    <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <!--
+    <script type="text/javascript" src="js/eventemitter2.js"></script>
+    <script type="text/javascript" src="js/mjpegcanvas.min.js"></script>
+    <script src="js/binary.min.js"></script>
+-->
+    <script>
+        $(function() {
+            var TIMEOUT = 40;
+            var refreshInterval = setInterval(function() {
+                var random = Math.floor(Math.random() * Math.pow(2, 31));
+                $('img#imgtag').attr('src', 'http://localhost:8080/video/myvid.jpg?i=' + random);
+            }, TIMEOUT);
+        });
+         // Connect to Binary.js server
+         //        var client = new BinaryClient('ws://localhost:9000');
+         //         // Received new stream from server!
+         //        client.on('stream', function(stream, meta) {
+         //            // Buffer for parts
+         //            var parts = [];
+         //            // Got new data
+         //            stream.on('data', function(data) {
+         //                //parts.push(data);
+         //                console.log("Got Data!");
+         //            });
+         //            stream.on('end', function() {
+         //                console.log("Hello End!");
+         //                // Display new data in browser!
+         ////                var img = document.createElement("img");
+         ////                img.src = (window.URL || window.webkitURL).createObjectURL(new Blob(parts));
+         ////                document.body.appendChild(img);
+         //            });
+         //        });
+    </script>
+    <style>
+        /*Float Image in center*/
+        #imgtag, #ms{
+            max-width:720px;  
+            display:block;
+            margin:0 auto;
+        }
+        #ms { 
+            color:#fff;
+            background-color:#000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <h1 class="col-xs-12">SONY Action Cam Streaming from NodeJS with Socket.io</h1>
+        </div>
+        <div class="row">
+            <img class="col-xs-12" id="imgtag" src="" />
+            <!--            <canvas id='mjpeg'></canvas>-->
+        </div>
+        <div class="row">
+            <div class="col-xs-12" id="ms"></div>
+        </div>
+    </div>
+</body>
+
+</html>
